@@ -15,7 +15,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var secretKey = "pass123"
+var (
+	secretKey      = "pass123"
+	invalidatedMap = make(map[string]bool)
+)
 
 // GenerateJWT generates a new JWT token using the provided secret key
 func GenerateJWT(userID string, secretKey string) (string, error) {
@@ -77,10 +80,42 @@ func LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": token})
 }
 
+// LogoutHandler handles the logout request and invalidates the JWT token
 func LogoutHandler(c *gin.Context) {
-	// Perform logout logic here
+	// Get the JWT token from the Authorization header
+	tokenString := c.Request.Header.Get("Authorization")
+
+	invalidatedMap[tokenString] = true
+
+	// Clear the user's session
+	c.Set("userID", "")
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Get the JWT token from the Authorization header
+		tokenString := c.Request.Header.Get("Authorization")
+
+		// Check if the token is in the invalidatedMap
+		if invalidatedMap[tokenString] {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		// Verify the JWT token and extract the user ID
+		userID, err := VerifyJWT(tokenString)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		// Set the user ID on the context
+		c.Set("userID", userID)
+	}
 }
 
 func main() {
@@ -95,38 +130,38 @@ func main() {
 	 *     5. Add Payments and PatientID (foreign key)
 	 */
 
-	authMiddleware := func(c *gin.Context) {
-		// Get the JWT token from the Authorization header
-		tokenString := c.Request.Header.Get("Authorization")
+	// authMiddleware := func(c *gin.Context) {
+	// 	// Get the JWT token from the Authorization header
+	// 	tokenString := c.Request.Header.Get("Authorization")
 
-		token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-			// The secret key is used to verify the JWT token
-			return []byte(secretKey), nil
-		})
+	// 	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+	// 		// The secret key is used to verify the JWT token
+	// 		return []byte(secretKey), nil
+	// 	})
 
-		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
+	// 	if err != nil || !token.Valid {
+	// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	// 		c.Abort()
+	// 		return
+	// 	}
 
-		claims, ok := token.Claims.(*jwt.StandardClaims)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
+	// 	claims, ok := token.Claims.(*jwt.StandardClaims)
+	// 	if !ok {
+	// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	// 		c.Abort()
+	// 		return
+	// 	}
 
-		// Set the user ID on the context
-		c.Set("userID", claims.Subject)
-	}
+	// 	// Set the user ID on the context
+	// 	c.Set("userID", claims.Subject)
+	// }
 
 	router.POST("api/login", LoginHandler)
 	router.POST("api/logout", LogoutHandler)
 
 	// Protected routes
 	protected := router.Group("/api")
-	protected.Use(authMiddleware)
+	protected.Use(AuthMiddleware())
 	{
 		// Doctor routes
 		protected.GET("/hospital/doctors", doctorhandler.SelectAll)
