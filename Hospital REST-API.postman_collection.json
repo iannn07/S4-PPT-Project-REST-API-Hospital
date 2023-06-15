@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "79314754-0242-46a0-836a-b507e8d52da7",
+		"_postman_id": "60f9bd8c-156c-4090-976e-6d1fe167ac2f",
 		"name": "Hospital API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "27837086",
-		"_collection_link": "https://interstellar-desert-469516.postman.co/workspace/Hospital-API~64f5549b-8d6f-47e5-ba0a-6e72d79936e9/collection/27837086-79314754-0242-46a0-836a-b507e8d52da7?action=share&creator=27837086&source=collection_link"
+		"_exporter_id": "26577186"
 	},
 	"item": [
 		{
@@ -14,10 +13,16 @@
 					"name": "Create",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODY4OTc2MjcsInN1YiI6InVzZXIxMjMifQ.icN29I6wFE1vGR7s-h9MUojkAfvHhJp0LzkHN1l4AJo",
+								"type": "text"
+							}
+						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"doctor_name\": \"Dr. Syauqi\",\r\n    \"doctor_license\": \"10001\"\r\n}"
+							"raw": "{\r\n    \"doctor_name\": \"Dr. Ian\",\r\n    \"doctor_license\": \"10001\"\r\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/hospital/doctors",
@@ -37,9 +42,22 @@
 				},
 				{
 					"name": "Read All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODY4OTc2MjcsInN1YiI6InVzZXIxMjMifQ.icN29I6wFE1vGR7s-h9MUojkAfvHhJp0LzkHN1l4AJo",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
 						"url": {
 							"raw": "http://localhost:8080/api/hospital/doctors",
 							"protocol": "http",
@@ -60,9 +78,15 @@
 					"name": "Read",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODY4OTc2MjcsInN1YiI6InVzZXIxMjMifQ.icN29I6wFE1vGR7s-h9MUojkAfvHhJp0LzkHN1l4AJo",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "http://localhost:8080/api/hospital/doctors/1",
+							"raw": "http://localhost:8080/api/hospital/doctors/8",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -72,7 +96,7 @@
 								"api",
 								"hospital",
 								"doctors",
-								"1"
+								"8"
 							]
 						}
 					},
@@ -145,7 +169,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"doctor_id\": 1,\r\n    \"patient_name\": \"nahida\",\r\n    \"patient_dob\": \"1523-05-05\",\r\n    \"patient_gender\": \"Female\"\r\n}"
+							"raw": "{\r\n    \"doctor_id\": 9,\r\n    \"patient_name\": \"Caca\",\r\n    \"patient_dob\": \"2003-11-13\",\r\n    \"patient_gender\": \"Female\"\r\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/hospital/patients",
@@ -190,7 +214,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/hospital/patients/3",
+							"raw": "http://localhost:8080/api/hospital/patients/6",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -200,7 +224,7 @@
 								"api",
 								"hospital",
 								"patients",
-								"3"
+								"6"
 							]
 						}
 					},
@@ -266,7 +290,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"patient_id\": 3,\r\n    \"room_type\": \"VIP\"\r\n}"
+							"raw": "{\r\n    \"patient_id\": 7,\r\n    \"room_type\": \"VVIP\"\r\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/hospital/rooms",
@@ -311,7 +335,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/api/hospital/rooms/1",
+							"raw": "http://localhost:8080/api/hospital/rooms/6",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -321,7 +345,7 @@
 								"api",
 								"hospital",
 								"rooms",
-								"1"
+								"6"
 							]
 						}
 					},
@@ -387,7 +411,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"patient_id\": 3,\r\n    \"doctor_id\": 1,\r\n    \"diagnosis_date\": \"2023-06-09\",\r\n    \"diagnosis_description\": \"sakit pinggang\"\r\n}"
+							"raw": "{\r\n    \"patient_id\": 7,\r\n    \"doctor_id\": 9,\r\n    \"diagnosis_date\": \"2023-06-15\",\r\n    \"diagnosis_description\": \"Intracerebral Hemorrhage, the patient is a 19-year-old male with a past medical history of hypertension, hyperlipidemia, and diabetes mellitus who presents to the emergency department with a sudden onset of severe headache. The headache began approximately 1 hour ago and is described as a \\\"thunderclap\\\" headache. The patient also reports nausea, vomiting, and dizziness. On physical examination, the patient is alert and oriented but has left-sided weakness and numbness. His blood pressure is 180/110 mmHg, his heart rate is 100 beats per minute, and his respiratory rate is 20 breaths per minute. A computed tomography (CT) scan of the brain shows a sizeable intracerebral hemorrhage in the right frontal lobe.\"\r\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/hospital/diagnoses",
@@ -508,7 +532,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"patient_id\": 3,\r\n    \"pay_total\": \"1000\"\r\n}"
+							"raw": "{\r\n    \"patient_id\": 7,\r\n    \"pay_total\": \"Rp. 200.000.000\"\r\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8080/api/hospital/payments",
@@ -612,6 +636,63 @@
 								"hospital",
 								"payments",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "pass123",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODY4OTc2MjcsInN1YiI6InVzZXIxMjMifQ.icN29I6wFE1vGR7s-h9MUojkAfvHhJp0LzkHN1l4AJo",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/api/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"logout"
 							]
 						}
 					},

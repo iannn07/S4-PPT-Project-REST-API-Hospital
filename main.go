@@ -7,8 +7,81 @@ import (
 	"HospitalFinpro/handler/paymenthandler"
 	"HospitalFinpro/handler/roomhandler"
 	"HospitalFinpro/hospital"
+	"errors"
+	"net/http"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+var secretKey = "pass123"
+
+// GenerateJWT generates a new JWT token using the provided secret key
+func GenerateJWT(userID string, secretKey string) (string, error) {
+	expirationTime := time.Now().Add(1 * time.Hour) // Token valid for 1 hours
+
+	// Create the claims
+	claims := &jwt.StandardClaims{
+		ExpiresAt: expirationTime.Unix(),
+		Subject:   userID,
+	}
+
+	// Generate the token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
+
+// VerifyJWT verifies the JWT token and returns the user ID
+func VerifyJWT(tokenString string) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(*jwt.StandardClaims)
+	if !ok || !token.Valid {
+		return "", errors.New("invalid token")
+	}
+
+	return claims.Subject, nil
+}
+
+// LoginHandler handles
+func LoginHandler(c *gin.Context) {
+	// Get the secret key from the Authorization header
+	secretKey := c.GetHeader("Authorization")
+
+	if secretKey != "pass123" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userID := "user123"
+
+	token, err := GenerateJWT(userID, secretKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate JWT token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func LogoutHandler(c *gin.Context) {
+	// Perform logout logic here
+
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
+}
 
 func main() {
 	router := gin.Default()
@@ -19,16 +92,49 @@ func main() {
 	 *     2. Add Patient and DoctorID (foreign key)
 	 *     3. Add Room and PatientID (foreign key)
 	 *     4. Add Diagnose, PatientID (foreign key), and DoctorID (foreign key)
-	 *     5. Add Paymenta and PatientID (foreign key)
+	 *     5. Add Payments and PatientID (foreign key)
 	 */
 
-	// Doctor routes
-	router.GET("api/hospital/doctors", doctorhandler.SelectAll)
-	router.POST("api/hospital/doctors", doctorhandler.Create)
-	router.GET("api/hospital/doctors/:id", doctorhandler.Read)
-	router.PUT("api/hospital/doctors/:id", doctorhandler.Update)
-	router.DELETE("api/hospital/doctors/:id", doctorhandler.Delete)
+	authMiddleware := func(c *gin.Context) {
+		// Get the JWT token from the Authorization header
+		tokenString := c.Request.Header.Get("Authorization")
 
+		token, err := jwt.ParseWithClaims(tokenString, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+			// The secret key is used to verify the JWT token
+			return []byte(secretKey), nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		claims, ok := token.Claims.(*jwt.StandardClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		// Set the user ID on the context
+		c.Set("userID", claims.Subject)
+	}
+
+	router.POST("api/login", LoginHandler)
+	router.POST("api/logout", LogoutHandler)
+
+	// Protected routes
+	protected := router.Group("/api")
+	protected.Use(authMiddleware)
+	{
+		// Doctor routes
+		protected.GET("/hospital/doctors", doctorhandler.SelectAll)
+		protected.POST("/hospital/doctors", doctorhandler.Create)
+		protected.GET("/hospital/doctors/:id", doctorhandler.Read)
+		protected.PUT("/hospital/doctors/:id", doctorhandler.Update)
+		protected.DELETE("/hospital/doctors/:id", doctorhandler.Delete)
+	}
 	// Patient routes
 	router.GET("api/hospital/patients", patienthandler.SelectAll)
 	router.POST("api/hospital/patients", patienthandler.Create)
